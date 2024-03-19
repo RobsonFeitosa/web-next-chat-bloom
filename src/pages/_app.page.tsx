@@ -3,7 +3,11 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes'
 import type { AppProps } from 'next/app' 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import AppProvider from '@/hooks'
+import { globalStyles } from '@/styles/global'
  
+globalStyles()
+
+
 const queryClient = new QueryClient()
 
 export default function App({
