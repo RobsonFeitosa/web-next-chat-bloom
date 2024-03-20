@@ -28,6 +28,7 @@ export default function AddRoom({ isNewRoom }: AddRoomProps) {
     handleSubmit, 
     register,
     reset,
+    formState: { isSubmitting },
   } = useForm<AddRoomFormData>({
     resolver: zodResolver(roomInForm),
   })
@@ -53,7 +54,7 @@ export default function AddRoom({ isNewRoom }: AddRoomProps) {
       <Form as="form" onSubmit={handleSubmit(handleRegister)}> 
         <input placeholder="Nome da sala"  {...register("name")} />
 
-        <BtnAddRoom type="submit">
+        <BtnAddRoom type="submit" disabled={isSubmitting}>
           <FloppyDisk size={20}/>
         </BtnAddRoom>
       </Form>
