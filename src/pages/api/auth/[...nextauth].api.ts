@@ -3,8 +3,7 @@ import NextAuth, { NextAuthOptions } from 'next-auth'
 export function buildNextAuthOptions(): NextAuthOptions {
   return {
     providers: [],
-    callbacks: {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    callbacks: { 
       async signIn({ account }) {
         return true
       },
