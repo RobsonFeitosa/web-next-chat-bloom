@@ -1,13 +1,12 @@
 import io from 'socket.io-client';
 import { Arrow, MessageContent, MessageGroup, MessageWrapper, MessagesContainer } from "./styles";
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Room from '@/dtos/room.dto';
 import { useAuth } from '@/hooks/providers/auth'; 
 import { useGetAllChatsByRoomId } from '@/hooks/useGetAllChatsByRoomId';
 import groupMessagesByUser from './group-messages-users';
+import { EntityTypeEnum } from '../enum/entity-type';
 
-
- 
 export interface MessagesData {
   msg: string,
   user: {
@@ -54,7 +53,15 @@ export default function Messages({ room }: MessagesProps) {
     const socket = io(process.env.NEXT_PUBLIC_API_URL ?? ''); 
  
     socket.on('onMessage', (data) => {   
-      setMessages(state => [...state, data.content])
+      if(data.content.type === EntityTypeEnum.CHAT) {
+        const chatMessage: MessagesData = {
+          msg: data.content.chat_body?.msg,
+          user: data.content.chat_body?.user,
+          room_id: data.content.chat_body?.room_id
+        }
+ 
+        setMessages(state => [...state, chatMessage])
+      } 
     });
 
     return () => {
@@ -70,8 +77,10 @@ export default function Messages({ room }: MessagesProps) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
-
-  const messagesGrouped = groupMessagesByUser(messages); 
+ 
+  const messagesGrouped = useMemo(() => {
+    return groupMessagesByUser(messages); 
+  }, [messages])
   
   return (
     <MessagesContainer ref={scrollRef}> 
