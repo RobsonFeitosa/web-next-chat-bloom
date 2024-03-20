@@ -14,6 +14,8 @@ import {
   BtnDisconect,
   RoomsWraper
 } from "./styles";
+import { io } from "socket.io-client";
+import { EntityTypeEnum } from "../enum/entity-type";
 
 interface AsideRoomsProps{
   onRoom: Room | undefined
@@ -23,13 +25,45 @@ interface AsideRoomsProps{
 export default function AsideRooms({ onRoom, setOnRoom }: AsideRoomsProps) {
   const {user} = useAuth()
   const [isNewRoom, setIsNewRoom] = useState(false)
+  const [rooms, setRooms] = useState<Room[]>([])
 
-  const { data: rooms, refetch: getAllRoom} = useGetAllRoom()
+  const { data: roomsData, refetch: getAllRoom} = useGetAllRoom()
 
   useEffect(() => {
-    user && getAllRoom()
+    user && getAllRoom() 
   }, [user, getAllRoom])
 
+
+  useEffect(() => { 
+    if(!roomsData) {
+      return
+    } 
+
+    
+    setRooms(state => [...state, ...roomsData])
+  }, [roomsData])
+ 
+  useEffect(() => {
+    const socket = io(process.env.NEXT_PUBLIC_API_URL ?? ''); 
+    
+    socket.on('onMessage', (data) => {    
+      if(data.content.room_body && data.content.type === EntityTypeEnum.ROOM) {
+        const roomMessage: Room = { 
+          id: data.content.room_body.id,
+          name: data.content.room_body.name,
+          user_id: data.content.user_id,
+        } 
+  
+        setRooms(state => [...state, roomMessage])
+      } 
+    });
+
+    return () => {
+      socket.disconnect();
+      setRooms([]) 
+    }; 
+  }, [])
+ 
   function handleAddNewRoom() {
     setIsNewRoom(!isNewRoom)
   } 
