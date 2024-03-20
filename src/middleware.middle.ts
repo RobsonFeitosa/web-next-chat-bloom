@@ -25,11 +25,16 @@ export function middleware(req: NextRequest) {
   const token = req.cookies.get(keysConstants.TOKEN)?.value
 
   const isAuth = onAuthenticated(token ?? '')  
+ 
+  if(isAuth && routesPermission.includes(pathname) && user) { 
+    req.nextUrl.pathname = '/chat'
+    return NextResponse.redirect(req.nextUrl)
+  }
 
   if (!user && !routesPermission.includes(pathname) && !isAuth) { 
     req.nextUrl.pathname = '/'
     return NextResponse.redirect(req.nextUrl)
-  }
+  }  
 
   return NextResponse.next()
 }
