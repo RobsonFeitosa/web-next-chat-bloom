@@ -45,7 +45,11 @@ export const BtnLogin = styled('button', {
 
   width: 120,
   margin: '0 auto',
-    
+  
+  '&:disabled': {  
+    background: '#201f20',
+    color: 'white'
+  },  
 })
 
 export const Message = styled('span', {
