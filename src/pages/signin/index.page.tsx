@@ -20,21 +20,27 @@ export default function SignIn() {
   const { signIn } = useAuth()
   const router = useRouter()
   const [messageLogin, setMessageLogin] = useState('')
-
-  const { isSuccess, data: dataAuth, mutateAsync: getAuth } = useAuthenticate()
+ 
+  const email = router.query.email ? String(router.query.email) : undefined
+ 
+  const {data: dataAuth, mutateAsync: getAuth } = useAuthenticate()
 
   const {
     handleSubmit, 
     register,
-    formState: { errors, isSubmitting },
+    setValue,
+    formState: {isDirty },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInForm),
   })
 
   async function handleRegister(data: SignInFormData) { 
-    getAuth(data)
+    getAuth(data).then((response) => { 
+      const message = response?.access_token ? 'Login com sucesso, você será redirecionado...' : 'Erro no login tente novamente'
+         
+      setMessageLogin(message)   
+    })
   }
-
 
   useEffect(() => { 
     if(dataAuth?.access_token)  {
@@ -45,12 +51,14 @@ export default function SignIn() {
         router.push('/chat')
       }, 2000)
     }
-
-
-    const message = dataAuth?.access_token ? 'Login com sucesso, você será redirecionado...' : 'Erro no login tente novamente'
-    setMessageLogin(message) 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataAuth])
 
+  useEffect(() => {
+    setValue('email', email ?? '')
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [email])
+ 
  
   return ( 
     <MainLayout> 
@@ -66,7 +74,7 @@ export default function SignIn() {
             <input placeholder="Insira seu e-mail"  {...register("email")} />
             <input placeholder="Insira sua senha" {...register("password")} />
 
-            <BtnLogin type="submit">
+            <BtnLogin type="submit" disabled={!isDirty}>
               Entrar
             </BtnLogin>
 
