@@ -18,7 +18,7 @@ const messageForm = z.object({
 
 export type MessageFormData = z.infer<typeof messageForm>
 
-const socket = io('http://localhost:3333'); 
+const socket = io(process.env.NEXT_PUBLIC_API_URL ?? ''); 
 
 export default function Chat() {
   const { user, signOut } = useAuth()
