@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import AsideRooms from "./AsideRooms";
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -10,7 +10,27 @@ import { useForm } from "react-hook-form";
 import { useAuth } from "@/hooks/providers/auth";
 import User from "@/dtos/user.dto";
 import { useRouter } from "next/router";
+import { EntityTypeEnum } from "./enum/entity-type";
  
+interface ChatBody {
+  msg: string;
+  user: {
+    id: string;
+    name: string;
+  };
+  room_id: number;
+}
+
+interface RoomBody {
+  name: string;
+}
+
+export interface Message {
+  type: EntityTypeEnum;
+  user_id: string;
+  chat_body?: ChatBody;
+  room_body?: RoomBody;
+}
 
 const messageForm = z.object({ 
   message: z.string().min(1),  
@@ -38,14 +58,20 @@ export default function Chat() {
 
 
   async function handleRegister(data: MessageFormData) {   
-    socket.emit('newMessage', {
-      "msg": data.message,
-      "user": {
-        "name": user.name,
-        "id": user.id
-      },
-      "room_id": onRoom?.id
-    })
+    const chatMessage: Message = {
+      type: EntityTypeEnum.CHAT,
+      user_id: user.id,
+      chat_body: {
+        msg: data.message,
+        user: {
+          id: user.id,
+          name: user.name
+        },
+        room_id: Number(onRoom?.id)
+      } 
+    }
+ 
+    socket.emit('newMessage', chatMessage)
 
     setFocus('message')
     reset()
@@ -88,7 +114,6 @@ export default function Chat() {
 
       <ChatContent>
         <AsideRooms onRoom={onRoom} setOnRoom={handleOnRoom}/>
-
 
         <ChatWrapper>
           <ChatMessages>
