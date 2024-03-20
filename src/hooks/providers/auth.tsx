@@ -8,7 +8,8 @@ import React, {
 } from 'react'
 import jwtdecode from 'jwt-decode' 
 import { api } from '@/utils/handleClient'
-import { destroyCookie, parseCookies, setCookie } from 'nookies'
+import { destroyCookie, parseCookies, setCookie } from 'nookies'  
+import { keysConstants } from '@/helpers/keys-constants'
 
 export interface IUser {
   id: string
@@ -48,11 +49,11 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
         email: user.email, 
       } as IUser
 
-      setCookie(null, '@ChatBloom:token', token, {
+      setCookie(null, keysConstants.TOKEN, token, {
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: '/',
       })
-      setCookie(null, '@ChatBloom:user', JSON.stringify(user), {
+      setCookie(null, keysConstants.USER, JSON.stringify(user), {
         maxAge: 60 * 60 * 24 * 7, // 7 days
         path: '/',
       })
@@ -67,8 +68,8 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const cookies = parseCookies()
   const {
-    '@ChatBloom:token': tokenStorage,
-    '@ChatBloom:user': userStorage,
+    [keysConstants.TOKEN]: tokenStorage,
+    [keysConstants.USER]: userStorage,
   } = cookies
 
   useEffect(() => {
@@ -79,14 +80,11 @@ const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     }
   }, [tokenStorage, userStorage])
 
-  const signOut = useCallback(() => {
-    destroyCookie(null, '@ChatBloom:order', {
+  const signOut = useCallback(() => { 
+    destroyCookie(null, keysConstants.TOKEN, {
       path: '/',
     })
-    destroyCookie(null, '@ChatBloom:token', {
-      path: '/',
-    })
-    destroyCookie(null, '@ChatBloom:user', {
+    destroyCookie(null, keysConstants.USER, {
       path: '/',
     })
  
