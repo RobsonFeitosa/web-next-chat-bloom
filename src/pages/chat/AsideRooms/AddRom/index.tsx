@@ -1,13 +1,12 @@
 import { useForm } from "react-hook-form";
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import { AddRoomContainer, BtnAddRoom, Form } from "./styles";
-import { FloppyDisk } from "phosphor-react";
-import { useCreateRoom } from "@/hooks/useCreateRoom";
-import { useAuth } from "@/hooks/providers/auth";
-import { useGetAllRoom } from "@/hooks/useGetAllRoom";
-import { useEffect } from "react";
+import { FloppyDisk } from "phosphor-react"; 
+import { useAuth } from "@/hooks/providers/auth"; 
+import { Message } from "../../index.page";
+import { EntityTypeEnum } from "../../enum/entity-type";
+import { io } from "socket.io-client";
 
 const roomInForm = z.object({ 
   name: z.string().min(1),  
@@ -15,14 +14,14 @@ const roomInForm = z.object({
 
 export type AddRoomFormData = z.infer<typeof roomInForm>
 
+const socket = io(process.env.NEXT_PUBLIC_API_URL ?? ''); 
+
 interface AddRoomProps {
   isNewRoom: () => void
 }
 
 export default function AddRoom({ isNewRoom }: AddRoomProps) {
-  const { user } = useAuth()
-  const { isSuccess, mutateAsync: createRoom} = useCreateRoom()
-  const { refetch: getAllRoom} = useGetAllRoom()
+  const { user } = useAuth()  
 
   const {
     handleSubmit, 
@@ -34,20 +33,19 @@ export default function AddRoom({ isNewRoom }: AddRoomProps) {
   })
 
   async function handleRegister(data: AddRoomFormData) { 
-    createRoom({
-      name: data.name,
-      user_id: user.id
-    })
-  }
+    const roomMessage: Message = {
+      type: EntityTypeEnum.ROOM,
+      user_id: user.id,
+      room_body: {  
+        name: data.name
+      } 
+    } 
+ 
+    socket.emit('newMessage', roomMessage)
 
-  useEffect(() => {
-    if(isSuccess) {
-      reset()
-      getAllRoom()
-      isNewRoom()
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSuccess])
+    reset() 
+    isNewRoom()    
+  } 
 
   return (
     <AddRoomContainer> 
