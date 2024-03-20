@@ -3,9 +3,8 @@ import AddRoom from "./AddRom";
 import { useEffect, useState } from "react";
 import { useGetAllRoom } from "@/hooks/useGetAllRoom";
 import { useAuth } from "@/hooks/providers/auth";
-import { Plugs, SignIn } from "phosphor-react";
-import Room from "@/dtos/room.dto";
-import io from 'socket.io-client';
+import { Plugs } from "phosphor-react";
+import Room from "@/dtos/room.dto"; 
 
 import { 
   AsideRoomsContainer, 
@@ -19,9 +18,7 @@ import {
 interface AsideRoomsProps{
   onRoom: Room | undefined
   setOnRoom: (room: Room | undefined) => void
-}
-
-const socket = io('http://localhost:3333'); 
+} 
 
 export default function AsideRooms({ onRoom, setOnRoom }: AsideRoomsProps) {
   const {user} = useAuth()
